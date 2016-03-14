@@ -1,0 +1,28 @@
+{
+  "name": "BiliGif",
+  "version": "0.1.0",
+  "author": "nuo9",
+  "description": "An intresting application can get and show all gifs from bilibili",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-packager ./ BiliGif --platform=win32 --arch=x64 --asar=true --overwrite=true --version=0.36.9"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "bilibili",
+    "gifs"
+  ],
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": ""
+  },
+  "homepage": "",
+  "devDependencies": {
+    "electron-packager": "^5.2.1",
+    "electron-prebuilt": "^0.36.9"
+  }
+}
