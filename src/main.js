@@ -12,7 +12,8 @@ let mainBrowserWindow;
 let mainWebContents;
 let mainSession;
 
-let json_path;
+let json_path = './download/json/';
+let gifs_path = './download/gifs/';
 let json;
 
 let gif_size = {
@@ -21,7 +22,7 @@ let gif_size = {
 };
 let random_size = {};
 
-let window_config = {width: gif_size.width, height: gif_size.height, resizable: false, moveable: false, minisizeable: false, maxsizeable: false, closeable: false, fullscreenable: false, skipTaskbar:true, title:"gif", icon: null, frame: false, autoHideMenuBar:true, backgroundColor:"#FFF", hasShadow: false};
+let window_config = {width: gif_size.width, height: gif_size.height, resizable: false, moveable: false, minisizeable: false, maxsizeable: false, closeable: false, fullscreenable: false, skipTaskbar:true, title:'gif', icon: null, frame: false, autoHideMenuBar:true, backgroundColor:'#FFF', hasShadow: false};
 
 const main = {
     ready: function(){
@@ -35,7 +36,7 @@ const main = {
         mainBrowserWindow = new browserWindow({show: false});
         mainWebContents = mainBrowserWindow.webContents;
         // TODO options
-        // mainWebContents.openDevTools({});
+        mainWebContents.openDevTools({});
         mainSession = mainWebContents.session;
         mainWebContents.on('did-finish-load', function(){
             main.log('Did Finish Load!');
@@ -45,10 +46,13 @@ const main = {
     },
     downloadJson: function(){
         mainSession.on('will-download', function(event, item, webContents) {
-            json_path = './download/json/' + item.getFilename();
-            item.setSavePath(json_path);
+            var fileName = item.getFilename();
+            if(fileName.indexOf('json') == -1){
+                return;
+            }
+            item.setSavePath(json_path + fileName);
             item.on('done', function(e, state) {
-                if (state == "completed") {
+                if (state == 'completed') {
                     main.log('Json Get! ( ^_^ )');
                     setTimeout(main.readJson, 100);
                 } else {
@@ -59,10 +63,11 @@ const main = {
         mainWebContents.downloadURL('http://www.bilibili.com/index/index-icon.json');
     },
     readJson: function(){
-        fs.readFile(json_path, function(err, data){
+        fs.readFile(json_path + 'index-icon.json', function(err, data){
             if(!err){
                 json = JSON.parse(data).fix;
-                setTimeout(main.showGifs, 100);
+                //setTimeout(main.showGifs, 100);
+                setTimeout(main.saveGifs, 100);
             }else{
                 main.log('read error, path: ' + json_path);
             }
@@ -80,6 +85,37 @@ const main = {
         window_config.x = parseInt(Math.random() * random_size.x);
         window_config.y = parseInt(Math.random() * random_size.y);
         (new browserWindow(window_config)).webContents.loadURL(json[index].icon);
+    },
+    saveGifs: function(){
+        mainSession.on('will-download', function(event, item, webContents) {
+            if(item.getFilename().indexOf('gif') == -1){
+                return;
+            }
+
+            var oneJson = main.fromUrl(item.getURL());
+            if(oneJson != null){
+                item.setSavePath(gifs_path + oneJson.id + '_' + oneJson.title + '.gif');
+            }
+            item.on('done', function(e, state) {
+                if (state == 'completed') {
+                    main.log('Gif Get! ( ^_^ )');
+                } else {
+                    main.log('Gif Get Failed!');
+                }
+            });
+        });
+
+        for(var one in json){
+            mainWebContents.downloadURL(json[one].icon);
+        }
+    },
+    fromUrl: function(url) {
+        for (var one in json) {
+            if (url == json[one].icon) {
+                return json[one];
+            }
+        }
+        return null;
     }
 };
 

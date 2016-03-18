@@ -1,6 +1,6 @@
 {
   "name": "BiliGif",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "nuo9",
   "description": "An intresting application can get and show all gifs from bilibili",
   "main": "src/main.js",
